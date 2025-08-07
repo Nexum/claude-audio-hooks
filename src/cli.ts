@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, existsSync, copyFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -152,16 +152,14 @@ function showStatus(): void {
     }
     
     const hookTypes = ['PreToolUse', 'PostToolUse', 'Notification', 'Stop'];
-    const hookCommands = getHookCommands();
     
     hookTypes.forEach(hookType => {
       // @ts-ignore
       const hooks = settings.hooks[hookType];
-      const expectedCommand = hookCommands[hookType];
       
       if (hooks && hooks.length > 0) {
         const actualCommand = hooks[0]?.hooks?.[0]?.command;
-        const isInstalled = actualCommand?.includes('claude-hooks') || actualCommand?.includes(hookType.toLowerCase());
+        const isInstalled = actualCommand?.includes('claude-audio-hooks') || actualCommand?.includes(hookType.toLowerCase());
         console.log(`${isInstalled ? '✅' : '⚠️'} ${hookType}: ${isInstalled ? 'Installed' : 'Different hook detected'}`);
       } else {
         console.log(`❌ ${hookType}: Not installed`);
@@ -176,9 +174,9 @@ function showStatus(): void {
 
 function showHelp(): void {
   console.log(`
-Claude Code Hooks CLI
+Claude Audio Hooks CLI
 
-Usage: npx claude-code-hooks <command>
+Usage: npx claude-audio-hooks <command>
 
 Commands:
   install     Install hooks to Claude Code settings
@@ -187,9 +185,9 @@ Commands:
   help        Show this help message
 
 Examples:
-  npx claude-code-hooks install
-  npx claude-code-hooks status
-  npx claude-code-hooks uninstall
+  npx claude-audio-hooks install
+  npx claude-audio-hooks status
+  npx claude-audio-hooks uninstall
   `);
 }
 

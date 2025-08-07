@@ -1,6 +1,6 @@
-# Claude Code Hooks
+# Claude Audio Hooks
 
-Cross-platform status hooks for [Claude Code](https://claude.ai/code) with notifications and terminal management. Get visual and audio feedback when Claude is working, needs attention, or completes tasks.
+Cross-platform audio hooks for [Claude Code](https://claude.ai/code) with notifications and terminal management. Get visual and audio feedback when Claude is working, needs attention, or completes tasks.
 
 ## Features
 
@@ -13,7 +13,7 @@ Cross-platform status hooks for [Claude Code](https://claude.ai/code) with notif
 ## Quick Install
 
 ```bash
-npx claude-code-hooks install
+npx claude-audio-hooks install
 ```
 
 That's it! Your Claude Code instance will now have enhanced status management.
@@ -41,16 +41,16 @@ After installation, Claude Code will:
 
 ```bash
 # Install hooks
-npx claude-code-hooks install
+npx claude-audio-hooks install
 
 # Check installation status  
-npx claude-code-hooks status
+npx claude-audio-hooks status
 
 # Remove hooks
-npx claude-code-hooks uninstall
+npx claude-audio-hooks uninstall
 
 # Show help
-npx claude-code-hooks help
+npx claude-audio-hooks help
 ```
 
 ## Platform Support
@@ -114,7 +114,7 @@ node path/to/stop.js --chat
 ## Programmatic Usage
 
 ```typescript
-import { setTerminalStatus, STATUS_CONFIGS } from 'claude-code-hooks';
+import { setTerminalStatus, STATUS_CONFIGS } from 'claude-audio-hooks';
 
 // Set terminal status
 setTerminalStatus('working', 'Processing data...');
@@ -135,7 +135,7 @@ The CLI automatically updates your `~/.claude/settings.json`:
       "matcher": "",
       "hooks": [{
         "type": "command",
-        "command": "node /path/to/claude-hooks/dist/working.js"
+        "command": "node /path/to/claude-audio-hooks/dist/working.js"
       }]
     }],
     "PostToolUse": [{ "..." }],
@@ -178,8 +178,8 @@ chmod 644 ~/.claude/settings.json
 ## Development
 
 ```bash
-git clone https://github.com/yourusername/claude-code-hooks
-cd claude-code-hooks
+git clone https://github.com/yourusername/claude-audio-hooks
+cd claude-audio-hooks
 npm install
 npm run build
 npm link
