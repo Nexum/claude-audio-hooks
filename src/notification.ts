@@ -57,20 +57,22 @@ process.stdin.on("end", async () => {
         // Default behavior: play sound file
         let cmd: string;
 
-        if (os_platform === "darwin") {
-          // Use macOS built-in system sound at 50% volume
-          cmd = `afplay -v 0.5 /System/Library/Sounds/Funk.aiff`;
-        } else {
-          // For non-macOS platforms, try to use custom sound file
-          const soundFile = getSoundPath("on-agent-need-attention.mp3");
+        // Try to use custom sound file first
+        const soundFile = getSoundPath("on-agent-need-attention.mp3");
 
-          if (existsSync(soundFile)) {
-            if (os_platform === "win32") {
-              cmd = `powershell -c "(New-Object Media.SoundPlayer '${soundFile}').PlaySync()"`;
-            } else {
-              // Linux - try multiple players at 50% volume for MP3
-              cmd = `mpg123 -q --gain 50 "${soundFile}" 2>/dev/null || paplay --volume=32767 "${soundFile}" 2>/dev/null || play "${soundFile}" -v 0.5 2>/dev/null`;
-            }
+        if (existsSync(soundFile)) {
+          if (os_platform === "darwin") {
+            cmd = `afplay -v 0.5 "${soundFile}"`;
+          } else if (os_platform === "win32") {
+            cmd = `powershell -c "(New-Object Media.SoundPlayer '${soundFile}').PlaySync()"`;
+          } else {
+            // Linux - try multiple players at 50% volume for MP3
+            cmd = `mpg123 -q --gain 50 "${soundFile}" 2>/dev/null || paplay --volume=32767 "${soundFile}" 2>/dev/null || play "${soundFile}" -v 0.5 2>/dev/null`;
+          }
+        } else {
+          if (os_platform === "darwin") {
+            // Fallback to macOS built-in system sound at 50% volume
+            cmd = `afplay -v 0.5 /System/Library/Sounds/Funk.aiff`;
           } else {
             console.error(`Sound file not found: ${soundFile}`);
             console.error("Please ensure on-agent-need-attention.mp3 exists");
