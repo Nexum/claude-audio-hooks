@@ -158,9 +158,19 @@ sudo dnf install mpg123 pulseaudio-utils sox
 ```
 
 ### WSL Toast Notifications
-Install wsl-notify-send:
+Install wsl-notify-send for Windows toast notifications in WSL:
 ```bash
-# Download and install wsl-notify-send.exe to ~/.local/bin/
+# Create local bin directory
+mkdir -p ~/.local/bin
+
+# Download latest wsl-notify-send.exe
+curl -L https://github.com/stuartleeks/wsl-notify-send/releases/latest/download/wsl-notify-send.exe -o ~/.local/bin/wsl-notify-send.exe
+
+# Make executable
+chmod +x ~/.local/bin/wsl-notify-send.exe
+
+# Verify installation
+~/.local/bin/wsl-notify-send.exe --help
 ```
 
 ### Permission Errors
