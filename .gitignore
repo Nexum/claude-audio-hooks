@@ -1,0 +1,21 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.env
+.env.local
+.vscode/
+.idea/
+
+# Build outputs
+*.tsbuildinfo
+
+# OS generated files
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# npm
+package-lock.json
+*.tgz

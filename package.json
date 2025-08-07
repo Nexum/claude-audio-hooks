@@ -1,0 +1,46 @@
+{
+  "name": "claude-code-hooks",
+  "version": "1.0.0",
+  "description": "Cross-platform status hooks for Claude Code with notifications and terminal management",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "claude-hooks": "dist/cli.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build",
+    "install-hooks": "node dist/cli.js install",
+    "uninstall-hooks": "node dist/cli.js uninstall"
+  },
+  "files": [
+    "dist/**/*",
+    "sounds/**/*",
+    "README.md"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "hooks",
+    "notifications",
+    "terminal",
+    "status",
+    "cli"
+  ],
+  "author": "Dominik Kienzler",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nexum/claude-code-hooks.git"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "preferGlobal": true
+}
