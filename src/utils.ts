@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { platform } from "os";
+import { createInterface } from "readline";
 
 export function getLogsDir(): string {
   return join(process.env.HOME || process.cwd(), ".claude", "logs");
@@ -88,4 +89,11 @@ export function getHookTimestamp(hookType: string): number | null {
   } catch (e) {
     return null;
   }
+}
+
+export function createReadline() {
+  return createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
 }
