@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { exec } from 'child_process';
 import { logEvent, getSoundPath, getPlatform, getLogsDir, setHookTimestamp } from './utils.js';
+import { setTerminalStatus } from './status-manager.js';
 
 // Read input from stdin
 let input = '';
@@ -24,9 +25,9 @@ process.stdin.on('end', async () => {
     // Record stop timestamp for debouncing notifications
     setHookTimestamp('stop');
     
-    // Set terminal status to completed
+    // Set terminal status to completed (this will stop any animation)
     const result = data.result || data.summary || "Task completed";
-    process.stdout.write(`\x1b]0;✅ Claude - ${result}\x1b\\`);
+    setTerminalStatus("completed", result);
     
     // Play completion sound or speak notification
     const os_platform = getPlatform();
