@@ -1,6 +1,6 @@
 {
   "name": "claude-audio-hooks",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cross-platform audio hooks for Claude Code with notifications and terminal management",
   "type": "module",
   "main": "dist/index.js",
