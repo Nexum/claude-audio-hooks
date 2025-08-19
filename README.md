@@ -1,122 +1,201 @@
 # Claude Audio Hooks
 
-Cross-platform audio hooks for [Claude Code](https://claude.ai/code) with notifications and terminal management. Get visual and audio feedback when Claude is working, needs attention, or completes tasks.
+Cross-platform audio feedback for [Claude Code](https://claude.ai/code) with intelligent installation modes. Get audio notifications, voice summaries, and activity logging when Claude is working, needs attention, or completes tasks.
 
-## Features
+## ✨ Features
 
-- 🖥️ **Terminal Title Management**: See Claude's status in your terminal title with emojis
-- 🔔 **Cross-platform Notifications**: Toast notifications and system sounds
-- 📝 **Activity Logging**: JSON logs of all hook events
-- 🎵 **Custom Sounds**: Support for custom notification sounds
-- 🗣️ **Text-to-Speech**: macOS voice notifications (optional)
+### 🎵 Two Installation Modes
 
-## Quick Install
+**📢 Standard Mode**
+- 🔔 Audio notifications for attention needed
+- ✅ Completion sounds when tasks finish
+- 📝 Activity logging for debugging
+
+**🗣️ TTS Summary Mode** *(New!)*
+- 🎙️ AI-generated voice summaries powered by ElevenLabs
+- 🧠 Contextual messages describing what Claude is doing
+- 🔄 Automatic ElevenLabs MCP server configuration
+
+### 🌍 Cross-Platform Support
+- **macOS**: System sounds, TTS fallback, native notifications
+- **Windows/WSL**: Toast notifications, MP3 playback
+- **Linux**: Multiple audio backends, desktop notifications
+
+## 🚀 Quick Start
 
 ```bash
 npx claude-audio-hooks install
 ```
 
-That's it! Your Claude Code instance will now have enhanced status management.
+This launches an **interactive installation wizard** where you can:
+1. Choose between Standard or TTS mode
+2. Configure your ElevenLabs API key (for TTS mode)
+3. Automatically set up all necessary configurations
 
-## What You Get
+## 🎯 Installation Modes
 
-After installation, Claude Code will:
+### Standard Mode
+Perfect for basic audio feedback:
+- **PreToolUse**: Activity logging
+- **Notification**: Sound alerts when Claude needs attention
+- **Stop**: Completion sounds when tasks finish
 
-- **⚡ Show "Working"** in terminal title during tool execution
-- **💤 Show "Idle"** when finished with tasks  
-- **🔔 Send notifications** when attention is needed
-- **✅ Play completion sounds** when tasks finish
-- **📁 Log all activities** to `~/.claude/logs/`
+### TTS Summary Mode  
+AI-powered voice feedback (requires [ElevenLabs API key](https://elevenlabs.io/app/speech-synthesis)):
+- **PreToolUse**: Activity logging
+- **Notification**: Voice summary like *"Attention: file not found"*
+- **Stop**: Voice summary like *"Completed: git commit"*
+- **Auto-setup**: ElevenLabs MCP server automatically configured
 
-## Hook Types
+> 💡 **Free Tier Available**: ElevenLabs offers 10k characters per month free
 
-| Hook | Trigger | Action |
-|------|---------|---------|
-| `PreToolUse` | Before tool execution | Terminal shows "⚡ Working..." |
-| `PostToolUse` | After tool execution | Terminal shows "💤 Idle" |
-| `Notification` | When attention needed | System notification + sound |
-| `Stop` | Task completion | Completion sound + transcript logging |
+## 🛠️ Commands
 
-## Commands
-
+### Basic Commands
 ```bash
-# Install hooks
+# Interactive installation with mode selection
 npx claude-audio-hooks install
 
-# Check installation status  
+# Check current configuration and status
 npx claude-audio-hooks status
 
-# Remove hooks
+# Remove all hooks and configuration
 npx claude-audio-hooks uninstall
 
-# Show help
+# Show all available commands
 npx claude-audio-hooks help
 ```
 
-## Platform Support
+### Advanced Commands
+```bash
+# Change settings (API keys, etc.)
+npx claude-audio-hooks configure
 
-### macOS
-- Uses built-in system sounds (Glass.aiff, Funk.aiff)
-- Optional text-to-speech with `--speak` flag
-- Native terminal title support
+# Switch between Standard and TTS modes
+npx claude-audio-hooks switch-mode
+```
 
-### Windows/WSL
-- Toast notifications via wsl-notify-send or PowerShell
-- MP3 sound file support
-- Cross-platform path handling
+## 📊 What You Get
 
-### Linux  
-- Multiple audio player support (mpg123, paplay, sox)
-- Desktop notification integration
-- Terminal escape sequence support
+After installation, Claude Code will provide feedback based on your chosen mode:
 
-## Custom Sounds
+### Standard Mode
+- **⚡ Working**: Claude is executing tools
+- **🔔 Attention**: Claude needs your input
+- **✅ Complete**: Tasks finished successfully
+- **📁 Logs**: Activity saved to `~/.claude/logs/`
 
+### TTS Mode
+- **⚡ Working**: Same activity logging
+- **🗣️ Voice Alerts**: AI-generated summaries instead of beeps
+- **🎙️ Contextual**: Messages like "Attention: permission denied" or "Completed: database updated"
+- **📁 Logs**: Enhanced logging with TTS events
+
+## 🔧 Technical Details
+
+### Hook Integration
+
+The package installs these Claude Code hooks:
+
+| Hook | Standard Mode | TTS Mode |
+|------|---------------|----------|
+| `PreToolUse` | Activity logging | Activity logging |
+| `Notification` | Sound notifications | TTS voice summaries |
+| `Stop` | Completion sounds | TTS voice summaries |
+
+### Configuration Files
+
+- **`~/.claude/audio-hooks-config.json`**: Your installation preferences
+- **`~/.claude.json`**: ElevenLabs MCP server config (TTS mode only)
+- **`~/.claude/settings.json`**: Claude Code hook configuration
+- **`~/.claude/logs/`**: Activity and event logs
+
+### MCP Integration (TTS Mode)
+
+When you choose TTS mode, the installer automatically:
+1. Configures ElevenLabs MCP server in `~/.claude.json`
+2. Validates your API key format
+3. Sets up secure environment variables
+4. Tests MCP connectivity
+
+## 🎨 Customization
+
+### Custom Sound Files (Standard Mode)
 Place custom sound files in `~/.claude/`:
-
 - `on-agent-complete.mp3` - Task completion sound
 - `on-agent-need-attention.mp3` - Notification sound
 
-The package includes fallback sounds, but custom files take precedence.
+### Voice Settings (TTS Mode)
+TTS uses ElevenLabs "Adam" voice by default. Modify `src/tts-summary.ts` to use different voices.
 
-## Log Files
+## 📱 Platform-Specific Setup
 
-Activity logs are saved to `~/.claude/logs/`:
+### macOS
+Works out of the box with system sounds. TTS mode includes system TTS fallback.
 
-```
-~/.claude/logs/
-├── working.json      # Tool execution events
-├── notifications.json # Attention notifications  
-├── stop.json         # Task completion events
-└── chat.json         # Chat transcripts (if enabled)
-```
+### Windows/WSL
+For enhanced notifications, install [wsl-notify-send](https://github.com/stuartleeks/wsl-notify-send):
 
-## Advanced Usage
-
-### Verbose Mode
 ```bash
-# Show colored status messages in console
-node path/to/status-manager.js working --verbose
+# Quick install
+mkdir -p ~/.local/bin && curl -L https://github.com/stuartleeks/wsl-notify-send/releases/latest/download/wsl-notify-send_windows_amd64.zip -o /tmp/wsl-notify-send.zip && unzip /tmp/wsl-notify-send.zip -d /tmp/ && mv /tmp/wsl-notify-send.exe ~/.local/bin/ && chmod +x ~/.local/bin/wsl-notify-send.exe
 ```
 
-### Text-to-Speech (macOS)
+### Linux
+Install audio players for sound support:
 ```bash
-# Enable voice notifications
-node path/to/notification.js --notify --speak
+# Ubuntu/Debian
+sudo apt install mpg123 pulseaudio-utils sox
+
+# Fedora/RHEL
+sudo dnf install mpg123 pulseaudio-utils sox
 ```
 
-### Chat Transcript Logging
+## 🐛 Troubleshooting
+
+### TTS Mode Issues
+- **API Key Invalid**: Ensure your ElevenLabs API key is correct
+- **MCP Not Working**: Restart Claude Code after installation
+- **No Voice Output**: Check audio system and volume settings
+
+### General Issues
+- **Hooks Not Working**: Run `npx claude-audio-hooks status` to verify installation
+- **Permission Errors**: Ensure `~/.claude/settings.json` is writable
+- **Audio Issues**: Install platform-specific audio players (see Platform Setup)
+
+### Getting Help
+1. Run `npx claude-audio-hooks status` for diagnostics
+2. Check `~/.claude/logs/` for error details
+3. Try switching between modes with `npx claude-audio-hooks switch-mode`
+
+## 🔄 Migration from v1.x
+
+If upgrading from an older version:
+
 ```bash
-# Enable transcript processing on completion
-node path/to/stop.js --chat
+# Remove old installation
+npx claude-audio-hooks uninstall
+
+# Install new version with guided setup
+npx claude-audio-hooks install
 ```
 
-## Programmatic Usage
+The new version uses a different configuration system and adds TTS capabilities.
+
+## 💻 Programmatic Usage
 
 ```typescript
-import { setTerminalStatus, STATUS_CONFIGS } from 'claude-audio-hooks';
+import { 
+  ConfigManager, 
+  setTerminalStatus, 
+  STATUS_CONFIGS 
+} from 'claude-audio-hooks';
 
-// Set terminal status
+// Check current mode
+const mode = ConfigManager.getCurrentMode();
+console.log(`Running in ${mode} mode`);
+
+// Set terminal status (Standard mode only)
 setTerminalStatus('working', 'Processing data...');
 
 // Available status types
@@ -124,99 +203,53 @@ const statuses = Object.keys(STATUS_CONFIGS);
 // ['working', 'attention', 'completed', 'error', 'idle']
 ```
 
-## Settings Integration
+## 🚧 Requirements
 
-The CLI automatically updates your `~/.claude/settings.json`:
+- **Node.js** >= 18.0.0
+- **Claude Code** installed and configured
+- **ElevenLabs API Key** (for TTS mode only)
+- Write access to `~/.claude/` directory
 
-```json
-{
-  "hooks": {
-    "PreToolUse": [{
-      "matcher": "",
-      "hooks": [{
-        "type": "command",
-        "command": "node /path/to/claude-audio-hooks/dist/working.js"
-      }]
-    }],
-    "PostToolUse": [{ "..." }],
-    "Notification": [{ "..." }],
-    "Stop": [{ "..." }]
-  }
-}
-```
-
-## Troubleshooting
-
-### No Sound on Linux
-Install audio players:
-```bash
-# Ubuntu/Debian
-sudo apt install mpg123 pulseaudio-utils sox
-
-# Fedora/RHEL  
-sudo dnf install mpg123 pulseaudio-utils sox
-```
-
-### WSL Toast Notifications
-Install wsl-notify-send for Windows toast notifications in WSL:
-
-**One-line installation:**
-```bash
-mkdir -p ~/.local/bin && curl -L https://github.com/stuartleeks/wsl-notify-send/releases/latest/download/wsl-notify-send_windows_amd64.zip -o /tmp/wsl-notify-send.zip && unzip /tmp/wsl-notify-send.zip -d /tmp/ && mv /tmp/wsl-notify-send.exe ~/.local/bin/ && rm /tmp/wsl-notify-send.zip && chmod +x ~/.local/bin/wsl-notify-send.exe
-```
-
-**Step-by-step installation:**
-```bash
-# Create local bin directory
-mkdir -p ~/.local/bin
-
-# Download and extract latest wsl-notify-send (64-bit)
-curl -L https://github.com/stuartleeks/wsl-notify-send/releases/latest/download/wsl-notify-send_windows_amd64.zip -o /tmp/wsl-notify-send.zip
-unzip /tmp/wsl-notify-send.zip -d /tmp/
-mv /tmp/wsl-notify-send.exe ~/.local/bin/
-rm /tmp/wsl-notify-send.zip
-
-# Make executable
-chmod +x ~/.local/bin/wsl-notify-send.exe
-
-# Verify installation
-~/.local/bin/wsl-notify-send.exe --help
-```
-
-### Permission Errors
-Ensure Claude Code settings file is writable:
-```bash
-chmod 644 ~/.claude/settings.json
-```
-
-## Requirements
-
-- Node.js >= 18.0.0
-- Claude Code installed
-- Write access to `~/.claude/settings.json`
-
-## Development
+## 🧪 Development
 
 ```bash
-git clone https://github.com/yourusername/claude-audio-hooks
+git clone https://github.com/Nexum/claude-audio-hooks
 cd claude-audio-hooks
 npm install
 npm run build
+
+# Test locally
 npm link
+npx claude-audio-hooks install
 ```
 
-## License
+## 📄 License
 
-MIT - See LICENSE file for details.
+MIT - See [LICENSE](LICENSE) file for details.
 
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch
-3. Make your changes
-4. Add tests if applicable  
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 🆕 Changelog
+
+### v1.1.0 *(Latest)*
+- ✨ Interactive installation wizard
+- 🗣️ TTS Summary mode with ElevenLabs integration
+- ⚙️ Automatic MCP server configuration
+- 🔄 Mode switching capabilities
+- 📊 Enhanced status reporting
+- 🛠️ New CLI commands: `configure`, `switch-mode`
+
+### v1.0.x
+- Basic audio hooks and terminal status management
 
 ---
 
 **Made for the Claude Code community** 🤖✨
+
+*Get instant audio feedback and never miss when Claude needs your attention!*
