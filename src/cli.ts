@@ -17,7 +17,6 @@ interface HookConfig {
 interface ClaudeSettings {
   hooks?: {
     PreToolUse?: HookConfig[];
-    PostToolUse?: HookConfig[];
     Notification?: HookConfig[];
     Stop?: HookConfig[];
     SubagentStop?: HookConfig[];
@@ -49,7 +48,6 @@ function getHookCommands(): { [key: string]: string } {
   
   return {
     PreToolUse: `node "${join(distPath, 'working.js')}"`,
-    PostToolUse: `node "${join(distPath, 'status-manager.js')}" idle`,
     Notification: `node "${join(distPath, 'notification.js')}" --notify`,
     Stop: `node "${join(distPath, 'stop.js')}" --chat`
   };
@@ -101,8 +99,7 @@ function installHooks(): void {
     
     console.log('✅ Claude Code hooks installed successfully!');
     console.log('\\nHooks installed:');
-    console.log('  ⚡ PreToolUse - Shows working status');
-    console.log('  💤 PostToolUse - Shows idle status');
+    console.log('  ⚡ PreToolUse - Logs tool usage activity');
     console.log('  🔔 Notification - System notifications with sound');
     console.log('  ✅ Stop - Task completion with sound');
     
@@ -125,7 +122,6 @@ function uninstallHooks(): void {
     
     // Remove hook configurations
     delete settings.hooks.PreToolUse;
-    delete settings.hooks.PostToolUse;
     delete settings.hooks.Notification;
     delete settings.hooks.Stop;
     
@@ -151,7 +147,7 @@ function showStatus(): void {
       return;
     }
     
-    const hookTypes = ['PreToolUse', 'PostToolUse', 'Notification', 'Stop'];
+    const hookTypes = ['PreToolUse', 'Notification', 'Stop'];
     
     hookTypes.forEach(hookType => {
       // @ts-ignore

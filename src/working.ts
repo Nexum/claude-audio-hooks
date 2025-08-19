@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { logEvent } from "./utils.js";
-import { setTerminalStatus } from "./status-manager.js";
 
 let input = "";
 process.stdin.setEncoding("utf8");
@@ -17,10 +16,6 @@ process.stdin.on("end", async () => {
 
     // Log the working event
     logEvent("working", data);
-
-    // Set terminal status to animated working state
-    const task = data.task || data.tool || data.action || "Working";
-    setTerminalStatus("working", `${task}...`);
 
     process.exit(0);
   } catch (error) {
