@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import * as path from 'path';
+
 export interface StatusConfig {
   emoji: string;
   message: string;
@@ -40,8 +42,11 @@ export function setTerminalStatus(status: StatusType, customMessage?: string) {
   const config = STATUS_CONFIGS[status];
   const message = customMessage || config.message;
   
-  // Set terminal title with emoji and status
-  process.stdout.write(`\x1b]0;${config.emoji} Claude - ${message}\x1b\\`);
+  // Get current folder name
+  const currentFolder = path.basename(process.cwd());
+  
+  // Set terminal title with folder, emoji and status
+  process.stdout.write(`\x1b]0;${currentFolder} ${config.emoji} Claude - ${message}\x1b\\`);
   
   // Optional: Also log to console with color (can be disabled)
   if (process.argv.includes('--verbose')) {
@@ -50,8 +55,11 @@ export function setTerminalStatus(status: StatusType, customMessage?: string) {
 }
 
 export function clearTerminalStatus() {
-  // Reset to default terminal title
-  process.stdout.write(`\x1b]0;Claude Code\x1b\\`);
+  // Get current folder name
+  const currentFolder = path.basename(process.cwd());
+  
+  // Reset to default terminal title with folder
+  process.stdout.write(`\x1b]0;${currentFolder} Claude Code\x1b\\`);
 }
 
 // CLI usage when called directly
