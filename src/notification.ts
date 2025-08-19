@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { exec } from "child_process";
 import { existsSync } from "fs";
-import { logEvent, getSoundPath, getPlatform, isWSL } from "./utils.js";
+import { logEvent, getSoundPath, getPlatform, isWSL, getHookTimestamp } from "./utils.js";
 
 let input = "";
 process.stdin.setEncoding("utf8");
@@ -21,6 +21,17 @@ process.stdin.on("end", async () => {
 
     // Play notification sound if --notify flag is present
     if (process.argv.includes("--notify")) {
+      // Check if stop hook executed recently (within 500ms)
+      const stopTimestamp = getHookTimestamp('stop');
+      const now = Date.now();
+      const debounceWindow = 500; // milliseconds
+      
+      if (stopTimestamp && (now - stopTimestamp) < debounceWindow) {
+        // Stop hook executed recently, skip notification to avoid double notification
+        process.exit(0);
+        return;
+      }
+      
       const os_platform = getPlatform();
 
       // Set terminal status to attention required

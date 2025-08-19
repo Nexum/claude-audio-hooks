@@ -53,3 +53,39 @@ export function getPlatform(): string {
 export function isWSL(): boolean {
   return !!process.env.WSL_DISTRO_NAME;
 }
+
+export function getHookStateFile(): string {
+  return join(getLogsDir(), 'hook-state.json');
+}
+
+export function setHookTimestamp(hookType: string): void {
+  ensureLogsDir();
+  const stateFile = getHookStateFile();
+  
+  let state: Record<string, number> = {};
+  if (existsSync(stateFile)) {
+    try {
+      state = JSON.parse(readFileSync(stateFile, "utf8"));
+    } catch (e) {
+      state = {};
+    }
+  }
+
+  state[hookType] = Date.now();
+  writeFileSync(stateFile, JSON.stringify(state, null, 2));
+}
+
+export function getHookTimestamp(hookType: string): number | null {
+  const stateFile = getHookStateFile();
+  
+  if (!existsSync(stateFile)) {
+    return null;
+  }
+
+  try {
+    const state: Record<string, number> = JSON.parse(readFileSync(stateFile, "utf8"));
+    return state[hookType] || null;
+  } catch (e) {
+    return null;
+  }
+}

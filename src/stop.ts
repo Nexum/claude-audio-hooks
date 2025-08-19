@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { exec } from 'child_process';
-import { logEvent, getSoundPath, getPlatform, getLogsDir } from './utils.js';
+import { logEvent, getSoundPath, getPlatform, getLogsDir, setHookTimestamp } from './utils.js';
 
 // Read input from stdin
 let input = '';
@@ -20,6 +20,9 @@ process.stdin.on('end', async () => {
     
     // Log the stop event
     logEvent('stop', data);
+    
+    // Record stop timestamp for debouncing notifications
+    setHookTimestamp('stop');
     
     // Set terminal status to completed
     const result = data.result || data.summary || "Task completed";
