@@ -58,7 +58,31 @@ export class SoundManager {
     return this.config.availableSounds.find(sound => sound.id === id);
   }
   
-  async previewSound(soundId: string): Promise<void> {
+  getCustomSoundPath(eventType: string): string {
+    const claudeDir = join(process.env.HOME || process.cwd(), '.claude');
+    return join(claudeDir, `${eventType}-custom.mp3`);
+  }
+  
+  customSoundExists(eventType: string): boolean {
+    return existsSync(this.getCustomSoundPath(eventType));
+  }
+  
+  displayCustomSoundInstructions(eventType: string): void {
+    const customPath = this.getCustomSoundPath(eventType);
+    const exists = this.customSoundExists(eventType);
+    
+    console.log('\n📁 Custom Sound Setup Instructions:');
+    console.log(`   Place your custom sound file at: ${customPath}`);
+    
+    if (exists) {
+      console.log('   ✅ Custom sound file found');
+    } else {
+      console.log('   ⚠️  Custom sound file not found - will use fallback sound until you add it');
+    }
+    console.log('   💡 Supported formats: .mp3, .wav, .aiff\n');
+  }
+  
+  async previewSound(soundId: string, eventType?: string): Promise<void> {
     const sound = this.getSoundById(soundId);
     
     if (!sound) {
@@ -73,7 +97,20 @@ export class SoundManager {
     console.log(`🎵 Playing: ${sound.name}`);
     
     try {
-      await playSound(sound.file);
+      let soundFile = sound.file;
+      
+      // Handle custom sound preview
+      if (soundId === 'custom' && eventType) {
+        const customPath = this.getCustomSoundPath(eventType);
+        if (this.customSoundExists(eventType)) {
+          soundFile = `${eventType}-custom.mp3`;
+        } else {
+          console.log('❌ Custom sound file not found - cannot preview');
+          return;
+        }
+      }
+      
+      await playSound(soundFile);
     } catch (error) {
       console.log(`❌ Error playing sound: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -129,10 +166,15 @@ export class SoundManager {
             }
           ]);
           
-          await this.previewSound(soundToPreview);
+          await this.previewSound(soundToPreview, eventType.key);
           console.log(''); // Add spacing after preview
         } else {
           selectedSound = choice;
+          
+          // If custom sound selected, show instructions
+          if (choice === 'custom') {
+            this.displayCustomSoundInstructions(eventType.key);
+          }
         }
       } while (!selectedSound);
       

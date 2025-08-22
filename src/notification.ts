@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { exec } from "child_process";
 import { existsSync } from "fs";
-import { logEvent, getSoundPath, getPlatform, isWSL, getHookTimestamp } from "./utils.js";
+import { logEvent, getEventSoundPath, getPlatform, isWSL, getHookTimestamp } from "./utils.js";
 import { ConfigManager } from "./config-manager.js";
 import { SoundManager } from "./sound-manager.js";
 
@@ -88,7 +88,7 @@ process.stdin.on("end", async () => {
           return;
         }
 
-        const soundFile = getSoundPath(selectedSound.file);
+        const soundFile = getEventSoundPath(selectedSound.file, 'notification');
 
         if (existsSync(soundFile)) {
           if (os_platform === "darwin") {

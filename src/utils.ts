@@ -56,6 +56,28 @@ export function getSoundPath(soundFile: string): string {
   return packageSoundPath;
 }
 
+export function getEventSoundPath(soundFile: string, eventType: string): string {
+  // Handle custom sound special case
+  if (soundFile === 'custom') {
+    const customSoundPath = join(
+      process.env.HOME || process.cwd(),
+      ".claude",
+      `${eventType}-custom.mp3`
+    );
+    
+    if (existsSync(customSoundPath)) {
+      return customSoundPath;
+    }
+    
+    // Fallback to default sound if custom doesn't exist
+    console.log(`Custom sound not found at ${customSoundPath}, using fallback`);
+    return getSoundPath(eventType === 'notification' ? 'on-agent-need-attention.mp3' : 'on-agent-complete.mp3');
+  }
+  
+  // For non-custom sounds, use existing logic
+  return getSoundPath(soundFile);
+}
+
 export function getPlatform(): string {
   return platform();
 }

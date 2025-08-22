@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { exec } from 'child_process';
-import { logEvent, getSoundPath, getPlatform, getLogsDir, setHookTimestamp } from './utils.js';
+import { logEvent, getEventSoundPath, getPlatform, getLogsDir, setHookTimestamp } from './utils.js';
 import { setTerminalStatus } from './status-manager.js';
 import { ConfigManager } from './config-manager.js';
 import { SoundManager } from './sound-manager.js';
@@ -91,7 +91,7 @@ process.stdin.on('end', async () => {
         return;
       }
 
-      const soundFile = getSoundPath(selectedSound.file);
+      const soundFile = getEventSoundPath(selectedSound.file, 'completion');
       
       if (existsSync(soundFile)) {
         // Determine the command based on the platform

@@ -19,6 +19,12 @@
       "file": "path-of-exile-exalted.mp3"
     },
     {
+      "id": "custom",
+      "name": "Custom Sound",
+      "description": "Use your own custom sound file",
+      "file": "custom"
+    },
+    {
       "id": "none",
       "name": "Silent",
       "description": "No sound",
