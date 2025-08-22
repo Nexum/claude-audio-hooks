@@ -2,6 +2,7 @@
 import inquirer from 'inquirer';
 import { ConfigManager, HookMode, AudioHooksConfig, SoundSelection } from './config-manager.js';
 import { SoundManager } from './sound-manager.js';
+import { getPlatform, isWSL } from './utils.js';
 
 export interface InstallationOptions {
   mode: HookMode;
@@ -64,6 +65,30 @@ export class Installer {
     ]);
     
     return apiKey.trim();
+  }
+
+  async promptForWindowsNotifications(): Promise<boolean> {
+    const platform = getPlatform();
+    
+    // Only show this prompt on Windows or WSL
+    if (platform !== 'win32' && !isWSL()) {
+      return false; // Not applicable on other platforms
+    }
+
+    console.log('\n🪟 Windows Notifications\n');
+    console.log('Claude can show Windows toast notifications when attention is needed.');
+    console.log('This requires wsl-notify-send to be installed for WSL users.\n');
+
+    const { enableNotifications } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'enableNotifications',
+        message: 'Enable Windows toast notifications?',
+        default: true
+      }
+    ]);
+
+    return enableNotifications;
   }
 
   async confirmInstallation(mode: HookMode, hasApiKey: boolean): Promise<boolean> {
@@ -139,6 +164,9 @@ export class Installer {
       const soundManager = new SoundManager();
       const soundSelection = await soundManager.selectSoundsInteractively();
 
+      // Windows notifications prompt
+      const enableWindowsNotifications = await this.promptForWindowsNotifications();
+
       // Confirm installation
       const confirmed = await this.confirmInstallation(mode, !!apiKey);
       if (!confirmed) {
@@ -147,7 +175,7 @@ export class Installer {
       }
 
       // Create configuration
-      const config = ConfigManager.createDefaultConfig(mode, apiKey, soundSelection);
+      const config = ConfigManager.createDefaultConfig(mode, apiKey, soundSelection, enableWindowsNotifications);
       return config;
 
     } catch (error) {
@@ -216,16 +244,28 @@ export class Installer {
         console.log('ElevenLabs API key: ✅ Configured');
       }
 
+      const configChoices = [
+        { name: 'Change installation mode', value: 'mode' },
+        { name: 'Update ElevenLabs API key', value: 'apikey' },
+      ];
+
+      // Add Windows notifications option if on Windows/WSL
+      const platform = getPlatform();
+      if (platform === 'win32' || isWSL()) {
+        configChoices.push({ 
+          name: `Toggle Windows notifications (currently ${currentConfig.enableWindowsNotifications ? 'enabled' : 'disabled'})`, 
+          value: 'notifications' 
+        });
+      }
+
+      configChoices.push({ name: 'Cancel', value: 'cancel' });
+
       const { choice } = await inquirer.prompt([
         {
           type: 'list',
           name: 'choice',
           message: 'What would you like to reconfigure?',
-          choices: [
-            { name: 'Change installation mode', value: 'mode' },
-            { name: 'Update ElevenLabs API key', value: 'apikey' },
-            { name: 'Cancel', value: 'cancel' }
-          ]
+          choices: configChoices
         }
       ]);
 
@@ -241,6 +281,13 @@ export class Installer {
         const newConfig: AudioHooksConfig = {
           ...currentConfig,
           elevenLabsApiKey: newApiKey
+        };
+        return newConfig;
+      } else if (choice === 'notifications') {
+        const newNotificationSetting = await this.promptForWindowsNotifications();
+        const newConfig: AudioHooksConfig = {
+          ...currentConfig,
+          enableWindowsNotifications: newNotificationSetting
         };
         return newConfig;
       } else if (choice === 'cancel') {

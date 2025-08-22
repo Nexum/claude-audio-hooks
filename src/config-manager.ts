@@ -13,6 +13,7 @@ export interface AudioHooksConfig {
   mode: HookMode;
   elevenLabsApiKey?: string;
   soundSelection: SoundSelection;
+  enableWindowsNotifications: boolean;
   installedAt: string;
   version: string;
 }
@@ -141,7 +142,7 @@ export class ConfigManager {
     return config?.elevenLabsApiKey || null;
   }
 
-  static createDefaultConfig(mode: HookMode, apiKey?: string, soundSelection?: SoundSelection): AudioHooksConfig {
+  static createDefaultConfig(mode: HookMode, apiKey?: string, soundSelection?: SoundSelection, enableWindowsNotifications?: boolean): AudioHooksConfig {
     return {
       mode,
       elevenLabsApiKey: apiKey,
@@ -149,6 +150,7 @@ export class ConfigManager {
         notification: 'attention',
         completion: 'complete'
       },
+      enableWindowsNotifications: enableWindowsNotifications ?? true, // Default to enabled
       installedAt: new Date().toISOString(),
       version: '1.0.2' // Hard-coded for now, can be made dynamic later
     };

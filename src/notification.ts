@@ -39,20 +39,26 @@ process.stdin.on("end", async () => {
       // Set terminal status to attention required
       process.stdout.write(`\x1b]0;🔔 Claude - ${data.message || data.type || 'Attention needed'}\x1b\\`);
       
-      // Show Windows toast notification if on Windows or WSL
-      if (os_platform === "win32" || isWSL()) {
-        const title = data.message || "Claude Hook";
-        const message = data.type || "Action required";
+      // Show Windows toast notification if on Windows or WSL and enabled in config
+      if ((os_platform === "win32" || isWSL())) {
+        // Check if Windows notifications are enabled in config
+        const config = ConfigManager.loadConfig();
+        const notificationsEnabled = config?.enableWindowsNotifications ?? true; // Default to enabled for backwards compatibility
         
-        // Try wsl-notify-send first (if installed), fallback to terminal flash
-        const wslNotifyCmd = `~/.local/bin/wsl-notify-send.exe --category "Claude" "${title}: ${message}"`;
-        
-        exec(wslNotifyCmd, (err) => {
-          if (err) {
-            console.log("wsl-notify-send error:", err.message);
-            console.log("Using terminal flash as fallback");
-          }
-        });
+        if (notificationsEnabled) {
+          const title = data.message || "Claude Hook";
+          const message = data.type || "Action required";
+          
+          // Try wsl-notify-send first (if installed), fallback to terminal flash
+          const wslNotifyCmd = `~/.local/bin/wsl-notify-send.exe --category "Claude" "${title}: ${message}"`;
+          
+          exec(wslNotifyCmd, (err) => {
+            if (err) {
+              console.log("wsl-notify-send error:", err.message);
+              console.log("Using terminal flash as fallback");
+            }
+          });
+        }
       }
 
       // Check if --speak flag is present and on macOS
