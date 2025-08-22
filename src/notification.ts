@@ -2,6 +2,8 @@
 import { exec } from "child_process";
 import { existsSync } from "fs";
 import { logEvent, getSoundPath, getPlatform, isWSL, getHookTimestamp } from "./utils.js";
+import { ConfigManager } from "./config-manager.js";
+import { SoundManager } from "./sound-manager.js";
 
 let input = "";
 process.stdin.setEncoding("utf8");
@@ -68,8 +70,19 @@ process.stdin.on("end", async () => {
         // Default behavior: play sound file
         let cmd: string;
 
-        // Try to use custom sound file first
-        const soundFile = getSoundPath("on-agent-need-attention.mp3");
+        // Get selected sound from config
+        const config = ConfigManager.loadConfig();
+        const soundManager = new SoundManager();
+        const selectedSoundId = config?.soundSelection?.notification || 'attention';
+        const selectedSound = soundManager.getSoundById(selectedSoundId);
+        
+        if (!selectedSound || !selectedSound.file) {
+          // Silent mode
+          process.exit(0);
+          return;
+        }
+
+        const soundFile = getSoundPath(selectedSound.file);
 
         if (existsSync(soundFile)) {
           if (os_platform === "darwin") {

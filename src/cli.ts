@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { Command } from 'commander';
 import { Installer } from './installer.js';
 import { ConfigManager, HookMode } from './config-manager.js';
 
@@ -355,69 +356,73 @@ async function reinstallHooks(mode: HookMode): Promise<void> {
   saveSettings(settings);
 }
 
-function showHelp(): void {
-  console.log(`
-🎵 Claude Audio Hooks CLI
+// Main CLI setup with commander
+const program = new Command();
 
-Usage: npx claude-audio-hooks <command>
+program
+  .name('claude-audio-hooks')
+  .description('🎵 Cross-platform audio hooks for Claude Code with notifications and terminal management')
+  .version('1.0.3');
 
-Commands:
-  install       Guided installation with mode selection
-  uninstall     Remove all hooks and configuration
-  status        Show current installation status
-  configure     Change settings (API keys, etc.)
-  switch-mode   Toggle between Standard and TTS modes
-  help          Show this help message
-
-Installation Modes:
-  📢 Standard   - Audio notifications and completion sounds
-  🗣️ TTS       - AI-generated voice summaries (requires ElevenLabs API key)
-
-Examples:
-  npx claude-audio-hooks install      # Interactive installation
-  npx claude-audio-hooks status       # Check current setup
-  npx claude-audio-hooks switch-mode  # Toggle between modes
-  npx claude-audio-hooks uninstall    # Remove everything
-  `);
-}
-
-// Main CLI logic
-async function main() {
-  const command = process.argv[2];
-
-  switch (command) {
-    case 'install':
+program
+  .command('install')
+  .description('Guided installation with mode selection')
+  .action(async () => {
+    try {
       await installHooks();
-      break;
-    case 'uninstall':
-      uninstallHooks();
-      break;
-    case 'status':
-      showStatus();
-      break;
-    case 'configure':
-      await configureHooks();
-      break;
-    case 'switch-mode':
-      await switchMode();
-      break;
-    case 'help':
-    case '--help':
-    case '-h':
-      showHelp();
-      break;
-    default:
-      if (command) {
-        console.error(`❌ Unknown command: ${command}`);
-        console.log('\nRun `npx claude-audio-hooks help` to see available commands.\n');
-      } else {
-        showHelp();
-      }
+    } catch (error) {
+      console.error('❌ Installation failed:', error);
       process.exit(1);
-  }
-}
+    }
+  });
 
-main().catch((error) => {
-  console.error('❌ Unexpected error:', error);
-  process.exit(1);
-});
+program
+  .command('uninstall')
+  .description('Remove all hooks and configuration')
+  .action(() => {
+    try {
+      uninstallHooks();
+    } catch (error) {
+      console.error('❌ Uninstallation failed:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('status')
+  .description('Show current installation status')
+  .action(() => {
+    try {
+      showStatus();
+    } catch (error) {
+      console.error('❌ Status check failed:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('configure')
+  .description('Change settings (API keys, sound selections, etc.)')
+  .action(async () => {
+    try {
+      await configureHooks();
+    } catch (error) {
+      console.error('❌ Configuration failed:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('switch-mode')
+  .description('Toggle between Standard and TTS modes')
+  .action(async () => {
+    try {
+      await switchMode();
+    } catch (error) {
+      console.error('❌ Mode switch failed:', error);
+      process.exit(1);
+    }
+  });
+
+// Parse command line arguments
+program.parse();

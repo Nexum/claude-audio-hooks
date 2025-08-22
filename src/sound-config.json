@@ -1,0 +1,40 @@
+{
+  "availableSounds": [
+    {
+      "id": "attention",
+      "name": "Attention Sound (Robot)",
+      "description": "Classic attention notification",
+      "file": "on-agent-need-attention.mp3"
+    },
+    {
+      "id": "complete",
+      "name": "Task Complete (Unreal Tournament(ish))",
+      "description": "Task completion chime",
+      "file": "on-agent-complete.mp3"
+    },
+    {
+      "id": "poe-exalted",
+      "name": "Path of Exile - Exalted",
+      "description": "Path of Exile - Exalted dropped",
+      "file": "path-of-exile-exalted.mp3"
+    },
+    {
+      "id": "none",
+      "name": "Silent",
+      "description": "No sound",
+      "file": null
+    }
+  ],
+  "eventTypes": [
+    {
+      "key": "notification",
+      "name": "Notification",
+      "description": "When Claude needs user attention"
+    },
+    {
+      "key": "completion",
+      "name": "Task Completion",
+      "description": "When Claude finishes a task"
+    }
+  ]
+}

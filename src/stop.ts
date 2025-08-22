@@ -4,6 +4,8 @@ import { join } from 'path';
 import { exec } from 'child_process';
 import { logEvent, getSoundPath, getPlatform, getLogsDir, setHookTimestamp } from './utils.js';
 import { setTerminalStatus } from './status-manager.js';
+import { ConfigManager } from './config-manager.js';
+import { SoundManager } from './sound-manager.js';
 
 // Read input from stdin
 let input = '';
@@ -77,8 +79,19 @@ process.stdin.on('end', async () => {
       // Default behavior: play sound file
       let cmd: string;
       
-      // Try to use custom sound file first
-      const soundFile = getSoundPath('on-agent-complete.mp3');
+      // Get selected sound from config
+      const config = ConfigManager.loadConfig();
+      const soundManager = new SoundManager();
+      const selectedSoundId = config?.soundSelection?.completion || 'complete';
+      const selectedSound = soundManager.getSoundById(selectedSoundId);
+      
+      if (!selectedSound || !selectedSound.file) {
+        // Silent mode
+        afterNotification();
+        return;
+      }
+
+      const soundFile = getSoundPath(selectedSound.file);
       
       if (existsSync(soundFile)) {
         // Determine the command based on the platform

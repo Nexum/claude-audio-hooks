@@ -105,6 +105,43 @@ export function getHookTimestamp(hookType: string): number | null {
 export function createReadline() {
   return createInterface({
     input: process.stdin,
-    output: process.stdout,
+    output: process.stdout
+  });
+}
+
+export function playSound(soundFile: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!soundFile) {
+      resolve();
+      return;
+    }
+
+    const soundPath = getSoundPath(soundFile);
+    
+    if (!existsSync(soundPath)) {
+      reject(new Error(`Sound file not found: ${soundPath}`));
+      return;
+    }
+
+    const os_platform = getPlatform();
+    let cmd: string;
+
+    if (os_platform === "darwin") {
+      cmd = `afplay -v 0.5 "${soundPath}"`;
+    } else if (os_platform === "win32") {
+      cmd = `powershell -c "(New-Object Media.SoundPlayer '${soundPath}').PlaySync()"`;
+    } else {
+      cmd = `mpg123 -q --gain 50 "${soundPath}" 2>/dev/null || paplay --volume=32767 "${soundPath}" 2>/dev/null || play "${soundPath}" -v 0.5 2>/dev/null`;
+    }
+
+    import("child_process").then(({ exec }) => {
+      exec(cmd, (err: any) => {
+        if (err) {
+          reject(new Error(`Error playing sound: ${err.message}`));
+        } else {
+          resolve();
+        }
+      });
+    }).catch(reject);
   });
 }

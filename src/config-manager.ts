@@ -4,9 +4,15 @@ import { join } from 'path';
 
 export type HookMode = 'standard' | 'tts';
 
+export interface SoundSelection {
+  notification: string;
+  completion: string;
+}
+
 export interface AudioHooksConfig {
   mode: HookMode;
   elevenLabsApiKey?: string;
+  soundSelection: SoundSelection;
   installedAt: string;
   version: string;
 }
@@ -135,10 +141,14 @@ export class ConfigManager {
     return config?.elevenLabsApiKey || null;
   }
 
-  static createDefaultConfig(mode: HookMode, apiKey?: string): AudioHooksConfig {
+  static createDefaultConfig(mode: HookMode, apiKey?: string, soundSelection?: SoundSelection): AudioHooksConfig {
     return {
       mode,
       elevenLabsApiKey: apiKey,
+      soundSelection: soundSelection || {
+        notification: 'attention',
+        completion: 'complete'
+      },
       installedAt: new Date().toISOString(),
       version: '1.0.2' // Hard-coded for now, can be made dynamic later
     };
