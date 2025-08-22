@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url';
 import { Command } from 'commander';
 import { Installer } from './installer.js';
 import { ConfigManager, HookMode } from './config-manager.js';
+import { SoundManager } from './sound-manager.js';
+import { getEventSoundPath } from './utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -144,6 +146,9 @@ async function installHooks(): Promise<void> {
       console.log('🔧 ElevenLabs MCP configured in ~/.claude.json');
       console.log('\n💡 Restart Claude Code to activate the TTS features');
     }
+    
+    // Play the configured completion sound
+    await playCompletionSound();
     
   } catch (error) {
     console.error('❌ Failed to install hooks:', error);
@@ -287,6 +292,9 @@ async function configureHooks(): Promise<void> {
       console.log('💡 Restart Claude Code to activate TTS features');
     }
     
+    // Play the configured completion sound
+    await playCompletionSound();
+    
   } catch (error) {
     console.error('❌ Failed to configure hooks:', error);
     process.exit(1);
@@ -319,6 +327,9 @@ async function switchMode(): Promise<void> {
     if (config.mode === 'tts') {
       console.log('💡 Restart Claude Code to activate TTS features');
     }
+    
+    // Play the configured completion sound
+    await playCompletionSound();
     
   } catch (error) {
     console.error('❌ Failed to switch mode:', error);
@@ -354,6 +365,53 @@ async function reinstallHooks(mode: HookMode): Promise<void> {
   });
   
   saveSettings(settings);
+}
+
+async function playCompletionSound(): Promise<void> {
+  try {
+    const { exec } = await import('child_process');
+    const { getPlatform } = await import('./utils.js');
+    
+    // Get the configured completion sound from user's config
+    const config = ConfigManager.loadConfig();
+    if (!config) return;
+    
+    const soundManager = new SoundManager();
+    const selectedSoundId = config.soundSelection?.completion || 'complete';
+    const selectedSound = soundManager.getSoundById(selectedSoundId);
+    
+    if (!selectedSound || !selectedSound.file) {
+      // Silent mode, don't play anything
+      return;
+    }
+    
+    const soundFile = getEventSoundPath(selectedSound.file, 'completion');
+    const os_platform = getPlatform();
+    
+    if (!existsSync(soundFile)) {
+      // Sound file doesn't exist, skip quietly
+      return;
+    }
+    
+    let cmd: string;
+    if (os_platform === "darwin") {
+      cmd = `afplay -v 0.5 "${soundFile}"`;
+    } else if (os_platform === "win32") {
+      cmd = `powershell -c "(New-Object Media.SoundPlayer '${soundFile}').PlaySync()"`;
+    } else {
+      // Linux - try multiple players at 50% volume for MP3
+      cmd = `mpg123 -q --gain 50 "${soundFile}" 2>/dev/null || paplay --volume=32767 "${soundFile}" 2>/dev/null || play "${soundFile}" -v 0.5 2>/dev/null`;
+    }
+    
+    exec(cmd, (err) => {
+      if (err) {
+        // Fail silently for sound issues
+        console.log('🎵 Installation complete!');
+      }
+    });
+  } catch (error) {
+    // Fail silently if sound playback fails
+  }
 }
 
 // Main CLI setup with commander
