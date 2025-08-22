@@ -17,7 +17,7 @@ export function ensureLogsDir(): void {
 export function logEvent(eventType: string, data: any): void {
   ensureLogsDir();
   const logFile = join(getLogsDir(), `${eventType}.json`);
-  
+
   let logs = [];
   if (existsSync(logFile)) {
     try {
@@ -36,15 +36,24 @@ export function logEvent(eventType: string, data: any): void {
 }
 
 export function getSoundPath(soundFile: string): string {
-  // Look for sound in package installation directory
-  const packageSoundPath = join(dirname(process.argv[1]), '../sounds', soundFile);
-  if (existsSync(packageSoundPath)) {
-    return packageSoundPath;
+  // prefer user's .claude directory
+  const userSoundPath = join(
+    process.env.HOME || process.cwd(),
+    ".claude",
+    soundFile
+  );
+  if (existsSync(userSoundPath)) {
+    return userSoundPath;
   }
-  
-  // Fallback to user's .claude directory
-  const userSoundPath = join(process.env.HOME || process.cwd(), ".claude", soundFile);
-  return userSoundPath;
+
+  // Look for sound in package installation directory
+  const packageSoundPath = join(
+    dirname(process.argv[1]),
+    "../sounds",
+    soundFile
+  );
+  // fallback to package installation directory
+  return packageSoundPath;
 }
 
 export function getPlatform(): string {
@@ -56,13 +65,13 @@ export function isWSL(): boolean {
 }
 
 export function getHookStateFile(): string {
-  return join(getLogsDir(), 'hook-state.json');
+  return join(getLogsDir(), "hook-state.json");
 }
 
 export function setHookTimestamp(hookType: string): void {
   ensureLogsDir();
   const stateFile = getHookStateFile();
-  
+
   let state: Record<string, number> = {};
   if (existsSync(stateFile)) {
     try {
@@ -78,13 +87,15 @@ export function setHookTimestamp(hookType: string): void {
 
 export function getHookTimestamp(hookType: string): number | null {
   const stateFile = getHookStateFile();
-  
+
   if (!existsSync(stateFile)) {
     return null;
   }
 
   try {
-    const state: Record<string, number> = JSON.parse(readFileSync(stateFile, "utf8"));
+    const state: Record<string, number> = JSON.parse(
+      readFileSync(stateFile, "utf8")
+    );
     return state[hookType] || null;
   } catch (e) {
     return null;
@@ -94,6 +105,6 @@ export function getHookTimestamp(hookType: string): number | null {
 export function createReadline() {
   return createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 }
